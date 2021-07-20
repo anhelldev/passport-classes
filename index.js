@@ -1,24 +1,20 @@
-const jwt = require('jsonwebtoken');
+const express = require('express');
+const session = require('express-session');
 
-const [, , option, secret, nameOrToken] = process.argv;
+const app = express();
 
+app.use(session({
+  resave: false,
+  saveUninitialized: false,
+  secret: 'keyboard cat dog'
+  })
+);
 
-if( !option || !secret || !nameOrToken){
-  return console.log('Missing Arguments!');
-}
+app.get('/', (req, res) => {
+  req.session.count = req.session.count ? req.session.count + 1 : 1;
+  res.status(200).json({hello: "world", counter: req.session.count })
+});
 
-function signToken(payload, secret) {
-  return jwt.sign(payload, secret);
-}
-
-function verifyToken(token, secret) {
-  return jwt.verify(token, secret);
-}
-
-if(option === 'sign'){
-  console.log(signToken({ sub: nameOrToken }, secret));
-} else if (option === 'verify'){
-  console.log(verifyToken(nameOrToken, secret))
-} else {
-  console.log('Options needs to be "sign" or "verify"')
-}
+app.listen(3000, () => {
+  console.log('listen http://localhost:3000')
+})
